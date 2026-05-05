@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Тренди освіти 2026 — Дашборд</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  :root {
+    --blue: #1B4FD8;
+    --blue-light: #EEF3FF;
+    --blue-mid: #3B6EF8;
+    --teal: #0E8A6E;
+    --teal-light: #E6F7F3;
+    --amber: #C47A1A;
+    --amber-light: #FEF5E7;
+    --coral: #D44C3D;
+    --coral-light: #FDF0EE;
+    --purple: #6B3FA0;
+    --purple-light: #F3EEF9;
+    --green: #2E7D4F;
+    --green-light: #EBF5F0;
+    --ink: #0D1117;
+    --ink-60: rgba(13,17,23,0.6);
+    --ink-30: rgba(13,17,23,0.3);
+    --ink-10: rgba(13,17,23,0.08);
+    --surface: #FAFAFA;
+    --white: #FFFFFF;
+    --border: rgba(13,17,23,0.1);
+    --radius: 14px;
+    --radius-sm: 8px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Manrope', sans-serif;
+    background: var(--surface);
+    color: var(--ink);
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  .header {
+    background: var(--ink);
+    color: var(--white);
+    padding: 36px 48px 32px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: -80px; right: -80px;
+    width: 320px; height: 320px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(59,110,248,0.35) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .header::after {
+    content: '';
+    position: absolute;
+    bottom: -60px; left: 30%;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(14,138,110,0.2) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .header-left { position: relative; z-index: 1; }
+  .header-eyebrow {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.45);
+    margin-bottom: 8px;
+  }
+  .header-title {
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    margin-bottom: 8px;
+  }
+  .header-subtitle { font-size: 14px; color: rgba(255,255,255,0.55); font-weight: 400; }
+  .header-right {
+    display: flex; gap: 12px;
+    position: relative; z-index: 1;
+    flex-shrink: 0;
+  }
+  .header-stat {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: var(--radius-sm);
+    padding: 14px 20px;
+    text-align: center;
+  }
+  .header-stat-value { font-size: 24px; font-weight: 700; color: var(--white); margin-bottom: 2px; }
+  .header-stat-label { font-size: 11px; color: rgba(255,255,255,0.45); }
+
+  /* ── Layout ── */
+  .main { padding: 32px 48px 48px; display: flex; flex-direction: column; gap: 24px; }
+
+  /* ── Metric strip ── */
+  .metrics-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  .metric-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 22px;
+    display: flex; flex-direction: column; gap: 6px;
+    transition: box-shadow 0.2s;
+    position: relative; overflow: hidden;
+  }
+  .metric-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+  .metric-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    border-radius: 3px 0 0 3px;
+  }
+  .metric-card.blue::before { background: var(--blue); }
+  .metric-card.teal::before { background: var(--teal); }
+  .metric-card.coral::before { background: var(--coral); }
+  .metric-card.amber::before { background: var(--amber); }
+  .metric-value { font-size: 28px; font-weight: 800; letter-spacing: -0.02em; }
+  .metric-value.blue { color: var(--blue); }
+  .metric-value.teal { color: var(--teal); }
+  .metric-value.coral { color: var(--coral); }
+  .metric-value.amber { color: var(--amber); }
+  .metric-label { font-size: 12px; color: var(--ink-60); font-weight: 500; }
+  .metric-note { font-size: 11px; color: var(--ink-30); }
+
+  /* ── Row layouts ── */
+  .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+  .row-2-3 { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+  .row-3-2 { display: grid; grid-template-columns: 3fr 2fr; gap: 20px; }
+
+  /* ── Card ── */
+  .card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px 24px;
+  }
+  .card-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ink-30);
+    margin-bottom: 18px;
+  }
+
+  /* ── Trend list ── */
+  .trend-item {
+    display: flex; align-items: flex-start; gap: 14px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--ink-10);
+    cursor: default;
+    transition: background 0.15s;
+    border-radius: 6px;
+    padding: 10px 8px;
+    margin: 0 -8px;
+  }
+  .trend-item:hover { background: var(--surface); }
+  .trend-item:last-child { border-bottom: none; }
+  .trend-rank {
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ink-30);
+    width: 20px;
+    flex-shrink: 0;
+    padding-top: 1px;
+  }
+  .trend-body { flex: 1; min-width: 0; }
+  .trend-name { font-size: 14px; font-weight: 600; color: var(--ink); margin-bottom: 2px; }
+  .trend-desc { font-size: 12px; color: var(--ink-60); line-height: 1.4; }
+  .badge {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; padding: 3px 9px;
+    border-radius: 20px; white-space: nowrap; flex-shrink: 0;
+  }
+  .badge-hot { background: #FDE8E6; color: #B73A2E; }
+  .badge-rise { background: #FEF3E0; color: #A0621A; }
+  .badge-core { background: #E8EFFE; color: #1B4FD8; }
+
+  /* ── Bar charts ── */
+  .bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 11px; }
+  .bar-row:last-child { margin-bottom: 0; }
+  .bar-label { font-size: 12px; color: var(--ink-60); width: 140px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .bar-track { flex: 1; background: var(--ink-10); border-radius: 4px; height: 7px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 4px; transition: width 0.8s cubic-bezier(0.22,1,0.36,1); }
+  .bar-pct { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--ink-30); width: 32px; text-align: right; flex-shrink: 0; }
+
+  /* ── Tags ── */
+  .tag-cloud { display: flex; flex-wrap: wrap; gap: 7px; }
+  .tag {
+    font-size: 12px; font-weight: 600; padding: 5px 12px;
+    border-radius: 20px; border: 1.5px solid transparent;
+    cursor: default; transition: transform 0.15s;
+  }
+  .tag:hover { transform: translateY(-1px); }
+  .tag-blue { background: var(--blue-light); color: var(--blue); border-color: rgba(27,79,216,0.15); }
+  .tag-teal { background: var(--teal-light); color: var(--teal); border-color: rgba(14,138,110,0.15); }
+  .tag-amber { background: var(--amber-light); color: var(--amber); border-color: rgba(196,122,26,0.15); }
+  .tag-coral { background: var(--coral-light); color: var(--coral); border-color: rgba(212,76,61,0.15); }
+  .tag-purple { background: var(--purple-light); color: var(--purple); border-color: rgba(107,63,160,0.15); }
+  .tag-green { background: var(--green-light); color: var(--green); border-color: rgba(46,125,79,0.15); }
+
+  /* ── Shift table ── */
+  .shift-grid { display: grid; grid-template-columns: 1fr 28px 1fr; gap: 0; margin-top: 4px; }
+  .shift-col-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
+  .shift-from .shift-col-title { color: var(--coral); }
+  .shift-to .shift-col-title { color: var(--teal); }
+  .shift-arrow-col { display: flex; flex-direction: column; align-items: center; padding-top: 30px; gap: 8px; }
+  .shift-item {
+    font-size: 12px; color: var(--ink-60); padding: 6px 10px;
+    border-radius: 6px; margin-bottom: 5px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+  }
+  .shift-arrow { font-size: 11px; color: var(--ink-30); }
+
+  /* ── Insight rows ── */
+  .insight-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--ink-10); }
+  .insight-item:last-child { border-bottom: none; }
+  .insight-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 6px; }
+  .insight-text { font-size: 13px; color: var(--ink-60); line-height: 1.5; }
+  .insight-text strong { color: var(--ink); font-weight: 600; }
+
+  /* ── Platform ── */
+  .platform-item { display: flex; align-items: center; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--ink-10); }
+  .platform-item:last-child { border-bottom: none; }
+  .platform-name { font-size: 13px; font-weight: 700; color: var(--ink); width: 90px; flex-shrink: 0; }
+  .platform-tags { display: flex; flex-wrap: wrap; gap: 4px; flex: 1; }
+  .platform-tag { font-size: 10px; background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 2px 7px; color: var(--ink-60); }
+
+  /* ── Format grid ── */
+  .format-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .format-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 11px 13px; }
+  .format-name { font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 2px; }
+  .format-desc { font-size: 11px; color: var(--ink-60); }
+
+  /* ── Chart containers ── */
+  .chart-wrap { position: relative; }
+
+  /* ── Footer ── */
+  .footer {
+    background: var(--ink);
+    color: rgba(255,255,255,0.35);
+    text-align: center;
+    padding: 20px 48px;
+    font-size: 12px;
+    font-family: 'Space Mono', monospace;
+    letter-spacing: 0.05em;
+  }
+
+  /* ── Scroll animation ── */
+  .fade-in {
+    opacity: 0;
+    transform: translateY(16px);
+    animation: fadeUp 0.5s ease forwards;
+  }
+  @keyframes fadeUp {
+    to { opacity: 1; transform: none; }
+  }
+  .fade-in:nth-child(1) { animation-delay: 0.05s; }
+  .fade-in:nth-child(2) { animation-delay: 0.10s; }
+  .fade-in:nth-child(3) { animation-delay: 0.15s; }
+  .fade-in:nth-child(4) { animation-delay: 0.20s; }
+  .fade-in:nth-child(5) { animation-delay: 0.25s; }
+  .fade-in:nth-child(6) { animation-delay: 0.30s; }
+
+  @media (max-width: 900px) {
+    .header { padding: 24px; flex-direction: column; align-items: flex-start; }
+    .main { padding: 20px; gap: 16px; }
+    .metrics-strip, .row-2, .row-3, .row-2-3, .row-3-2 { grid-template-columns: 1fr; }
+    .header-right { flex-wrap: wrap; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-left">
+    <div class="header-eyebrow">Management Development Centre · EBA</div>
+    <h1 class="header-title">Тренди освіти<br>2025–2026</h1>
+    <div class="header-subtitle">Комплексний аналіз: HR Tech Europe · Coursera · Udemy · Laba · HBS · Wharton · DDI</div>
+  </div>
+  <div class="header-right">
+    <div class="header-stat">
+      <div class="header-stat-value">8</div>
+      <div class="header-stat-label">топ-тем</div>
+    </div>
+    <div class="header-stat">
+      <div class="header-stat-value">5%</div>
+      <div class="header-stat-label">AI-first L&D</div>
+    </div>
+    <div class="header-stat">
+      <div class="header-stat-value">55%</div>
+      <div class="header-stat-label">компаній з AI</div>
+    </div>
+    <div class="header-stat">
+      <div class="header-stat-value">−35%</div>
+      <div class="header-stat-label">скорочення HR</div>
+    </div>
+  </div>
+</header>
+
+<main class="main">
+
+  <!-- Metrics strip -->
+  <div class="metrics-strip">
+    <div class="metric-card blue fade-in">
+      <div class="metric-value blue">5%</div>
+      <div class="metric-label">Компаній на рівні AI-first L&D</div>
+      <div class="metric-note">решта суттєво відстають</div>
+    </div>
+    <div class="metric-card coral fade-in">
+      <div class="metric-value coral">30%</div>
+      <div class="metric-label">Компаній досі роблять статичні тренінги</div>
+      <div class="metric-note">ризик застаріння</div>
+    </div>
+    <div class="metric-card teal fade-in">
+      <div class="metric-value teal">55%</div>
+      <div class="metric-label">Компаній ставлять AI в центр трансформації</div>
+      <div class="metric-note">за даними WEF</div>
+    </div>
+    <div class="metric-card amber fade-in">
+      <div class="metric-value amber">30–40%</div>
+      <div class="metric-label">Скорочення HR-ролей через AI</div>
+      <div class="metric-note">залишаться ті, хто приймає рішення</div>
+    </div>
+  </div>
+
+  <!-- Top themes + radar -->
+  <div class="row-3-2 fade-in">
+    <div class="card">
+      <div class="card-title">Топ-8 тем навчання 2026</div>
+      <div class="trend-item">
+        <div class="trend-rank">01</div>
+        <div class="trend-body">
+          <div class="trend-name">AI та Data-Driven прийняття рішень</div>
+          <div class="trend-desc">Стратегічне лідерство в AI, Generative AI, етика ШІ, прогнозна аналітика</div>
+        </div>
+        <span class="badge badge-hot">Топ</span>
+      </div>
+      <div class="trend-item">
+        <div class="trend-rank">02</div>
+        <div class="trend-body">
+          <div class="trend-name">Лідерство нового типу</div>
+          <div class="trend-desc">Емпатія, психологічна безпека, hybrid leadership, wellbeing команди</div>
+        </div>
+        <span class="badge badge-hot">Топ</span>
+      </div>
+      <div class="trend-item">
+        <div class="trend-rank">03</div>
+        <div class="trend-body">
+          <div class="trend-name">Стратегічне мислення</div>
+          <div class="trend-desc">Сценарне мислення, системний підхід, адаптивна стратегія</div>
+        </div>
+        <span class="badge badge-core">Core</span>
+      </div>
+      <div class="trend-item">
+        <div class="trend-rank">04</div>
+        <div class="trend-body">
+          <div class="trend-name">Decision-Making</div>
+          <div class="trend-desc">Вибір в умовах надлишку інформації, когнітивні викривлення, тиск часу</div>
+        </div>
+        <span class="badge badge-core">Core</span>
+      </div>
+      <div class="trend-item">
+        <div class="trend-rank">05</div>
+        <div class="trend-body">
+          <div class="trend-name">Problem Framing</div>
+          <div class="trend-desc">Правильно поставити задачу — цінніше ніж вирішити неправильну швидко</div>
+        </div>
+        <span class="badge badge-rise">Зростає</span>
+      </div>
+      <div class="trend-item">
+        <div class="trend-rank">06</div>
+        <div class="trend-body">
+          <div class="trend-name">Вплив та переговори</div>
+          <div class="trend-desc">Influence without authority, win-win переговори, EQ у складних ситуаціях</div>
+        </div>
+        <span class="badge badge-core">Core</span>
+      </div>
+      <div class="trend-item">
+        <div class="trend-rank">07</div>
+        <div class="trend-body">
+          <div class="trend-name">Продуктивність та фокус</div>
+          <div class="trend-desc">Енергоменеджмент, deep work, боротьба з когнітивним перевантаженням</div>
+        </div>
+        <span class="badge badge-rise">Зростає</span>
+      </div>
+      <div class="trend-item">
+        <div class="trend-rank">08</div>
+        <div class="trend-body">
+          <div class="trend-name">Business Acumen</div>
+          <div class="trend-desc">Кросфункціональне мислення, фінансова логіка, ownership за результат</div>
+        </div>
+        <span class="badge badge-rise">Зростає</span>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:20px;">
+      <div class="card">
+        <div class="card-title">Відносний попит на теми</div>
+        <div class="chart-wrap" style="height:240px;">
+          <canvas id="radarChart" role="img" aria-label="Радарна діаграма попиту на теми навчання 2026"></canvas>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Формати навчання 2026</div>
+        <div class="chart-wrap" style="height:180px;">
+          <canvas id="donutChart" role="img" aria-label="Кругова діаграма форматів навчання"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Platforms + Shift -->
+  <div class="row-2 fade-in">
+    <div class="card">
+      <div class="card-title">Що популярно: Coursera та Udemy</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+        <div>
+          <div style="font-size:12px;font-weight:700;color:var(--blue);margin-bottom:12px;">Coursera</div>
+          <div class="bar-row">
+            <div class="bar-label">Google Data Analytics</div>
+            <div class="bar-track"><div class="bar-fill" style="width:95%;background:var(--blue);"></div></div>
+            <div class="bar-pct">#1</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">Machine Learning (Ng)</div>
+            <div class="bar-track"><div class="bar-fill" style="width:88%;background:var(--blue);"></div></div>
+            <div class="bar-pct">#3</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">Well-Being (Yale)</div>
+            <div class="bar-track"><div class="bar-fill" style="width:82%;background:var(--teal);"></div></div>
+            <div class="bar-pct">#5</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">Learning How to Learn</div>
+            <div class="bar-track"><div class="bar-fill" style="width:78%;background:var(--teal);"></div></div>
+            <div class="bar-pct">#6</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">Digital Marketing (G)</div>
+            <div class="bar-track"><div class="bar-fill" style="width:72%;background:var(--amber);"></div></div>
+            <div class="bar-pct">#8</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">Time Management (UCI)</div>
+            <div class="bar-track"><div class="bar-fill" style="width:65%;background:var(--amber);"></div></div>
+            <div class="bar-pct">#10</div>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:12px;font-weight:700;color:var(--purple);margin-bottom:12px;">Udemy</div>
+          <div class="bar-row">
+            <div class="bar-label">Life Coach Training</div>
+            <div class="bar-track"><div class="bar-fill" style="width:95%;background:var(--purple);"></div></div>
+            <div class="bar-pct">#1</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">Leadership</div>
+            <div class="bar-track"><div class="bar-fill" style="width:92%;background:var(--purple);"></div></div>
+            <div class="bar-pct">#2</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">Personal Productivity</div>
+            <div class="bar-track"><div class="bar-fill" style="width:86%;background:var(--purple);"></div></div>
+            <div class="bar-pct">#3</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">PMP (Project Mgmt)</div>
+            <div class="bar-track"><div class="bar-fill" style="width:82%;background:var(--blue);"></div></div>
+            <div class="bar-pct">#1B</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">Communication Skills</div>
+            <div class="bar-track"><div class="bar-fill" style="width:75%;background:var(--purple);"></div></div>
+            <div class="bar-pct">#6</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">ChatGPT / AI</div>
+            <div class="bar-track"><div class="bar-fill" style="width:68%;background:var(--teal);"></div></div>
+            <div class="bar-pct">#9</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Ключовий зсув 2026</div>
+      <div class="shift-grid">
+        <div class="shift-from">
+          <div class="shift-col-title">Було</div>
+          <div class="shift-item">Статичні тренінги</div>
+          <div class="shift-item">Довгі програми</div>
+          <div class="shift-item">Теоретичні лекції</div>
+          <div class="shift-item">Контроль і ієрархія</div>
+          <div class="shift-item">Знання заради знань</div>
+          <div class="shift-item">Оцінка процесу</div>
+        </div>
+        <div class="shift-arrow-col">
+          <div class="shift-arrow">→</div>
+          <div class="shift-arrow">→</div>
+          <div class="shift-arrow">→</div>
+          <div class="shift-arrow">→</div>
+          <div class="shift-arrow">→</div>
+          <div class="shift-arrow">→</div>
+        </div>
+        <div class="shift-to">
+          <div class="shift-col-title">Стало</div>
+          <div class="shift-item">Практика + AI-інструменти</div>
+          <div class="shift-item">Мікро-навчання + регулярність</div>
+          <div class="shift-item">Симуляції та кейси</div>
+          <div class="shift-item">Довіра та empowerment</div>
+          <div class="shift-item">Навички під бізнес-задачу</div>
+          <div class="shift-item">Вимір outcome</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Platforms + Insights + Launch -->
+  <div class="row-3 fade-in">
+    <div class="card">
+      <div class="card-title">Платформи та школи</div>
+      <div class="platform-item">
+        <div class="platform-name">HBS Online</div>
+        <div class="platform-tags">
+          <span class="platform-tag">AI for Leaders</span>
+          <span class="platform-tag">Leadership</span>
+          <span class="platform-tag">Negotiation</span>
+          <span class="platform-tag">від $1,850</span>
+        </div>
+      </div>
+      <div class="platform-item">
+        <div class="platform-name">Wharton</div>
+        <div class="platform-tags">
+          <span class="platform-tag">Business Analytics</span>
+          <span class="platform-tag">Strategy</span>
+          <span class="platform-tag">від $3,500</span>
+        </div>
+      </div>
+      <div class="platform-item">
+        <div class="platform-name">DDI</div>
+        <div class="platform-tags">
+          <span class="platform-tag">Leadership тiers</span>
+          <span class="platform-tag">Simulations</span>
+          <span class="platform-tag">Coaching</span>
+        </div>
+      </div>
+      <div class="platform-item">
+        <div class="platform-name">Laba</div>
+        <div class="platform-tags">
+          <span class="platform-tag">HR + AI</span>
+          <span class="platform-tag">Marketing</span>
+          <span class="platform-tag">Бізнес</span>
+        </div>
+      </div>
+      <div class="platform-item">
+        <div class="platform-name">Projector</div>
+        <div class="platform-tags">
+          <span class="platform-tag">UX/UI</span>
+          <span class="platform-tag">IT PM</span>
+          <span class="platform-tag">Digital Marketing</span>
+        </div>
+      </div>
+      <div class="platform-item">
+        <div class="platform-name">Coursera</div>
+        <div class="platform-tags">
+          <span class="platform-tag">Data Science</span>
+          <span class="platform-tag">AI</span>
+          <span class="platform-tag">Well-being</span>
+        </div>
+      </div>
+      <div class="platform-item">
+        <div class="platform-name">Udemy</div>
+        <div class="platform-tags">
+          <span class="platform-tag">Leadership</span>
+          <span class="platform-tag">Productivity</span>
+          <span class="platform-tag">PMP</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Сигнали: HR Tech Europe</div>
+      <div class="insight-item">
+        <div class="insight-dot" style="background:var(--coral);"></div>
+        <div class="insight-text"><strong>L&D, що не змінився за 2 роки</strong> — вже застарів</div>
+      </div>
+      <div class="insight-item">
+        <div class="insight-dot" style="background:var(--blue);"></div>
+        <div class="insight-text"><strong>Лише 5%</strong> компаній на рівні AI-first, 30% — статика</div>
+      </div>
+      <div class="insight-item">
+        <div class="insight-dot" style="background:var(--amber);"></div>
+        <div class="insight-text"><strong>Рекрутинг</strong> — «битва AI проти AI»: автентичність як фільтр</div>
+      </div>
+      <div class="insight-item">
+        <div class="insight-dot" style="background:var(--teal);"></div>
+        <div class="insight-text"><strong>Менше 1% гіперперформерів</strong> дають 10× результат</div>
+      </div>
+      <div class="insight-item">
+        <div class="insight-dot" style="background:var(--purple);"></div>
+        <div class="insight-text"><strong>Червень 2026</strong> — gender pay gap директива. Готувати лідерів до pay-розмов</div>
+      </div>
+      <div class="insight-item">
+        <div class="insight-dot" style="background:var(--coral);"></div>
+        <div class="insight-text"><strong>HR скорочується 30–40%</strong> — залишаться ті, хто бачить контекст</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Що запускати у 2026</div>
+      <div class="tag-cloud" style="margin-bottom:18px;">
+        <span class="tag tag-coral">AI для лідерів</span>
+        <span class="tag tag-blue">Decision Lab</span>
+        <span class="tag tag-purple">Problem Framing</span>
+        <span class="tag tag-teal">Influence w/o authority</span>
+        <span class="tag tag-amber">Focus & Productivity</span>
+        <span class="tag tag-blue">Business thinking</span>
+        <span class="tag tag-green">Learning how to learn</span>
+        <span class="tag tag-teal">Wellbeing & resilience</span>
+        <span class="tag tag-purple">Hybrid leadership</span>
+        <span class="tag tag-coral">Negotiation Mastery</span>
+      </div>
+      <div class="card-title" style="margin-top:4px;">Принципи дизайну програм</div>
+      <div class="format-grid">
+        <div class="format-item">
+          <div class="format-name">Реальні задачі</div>
+          <div class="format-desc">Не вигадані кейси</div>
+        </div>
+        <div class="format-item">
+          <div class="format-name">Вимір outcome</div>
+          <div class="format-desc">Не процес, а результат</div>
+        </div>
+        <div class="format-item">
+          <div class="format-name">Короткі + регулярно</div>
+          <div class="format-desc">Мікро-навчання</div>
+        </div>
+        <div class="format-item">
+          <div class="format-name">Змішані групи</div>
+          <div class="format-desc">HR + маркетинг + фін.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer class="footer">
+  Management Development Centre · European Business Association · 2026 &nbsp;|&nbsp; Джерела: HR Tech Europe, Coursera, Udemy, Laba, Projector, HBS, Wharton, DDI, WEF
+</footer>
+
+<script>
+const textColor = 'rgba(13,17,23,0.45)';
+const gridColor = 'rgba(13,17,23,0.07)';
+
+new Chart(document.getElementById('radarChart'), {
+  type: 'radar',
+  data: {
+    labels: ['AI & Data', 'Лідерство', 'Стратегія', 'Decision', 'Problem\nFraming', 'Вплив', 'Продуктив-\nність', 'Business\nAcumen'],
+    datasets: [{
+      label: 'Попит 2026',
+      data: [95, 90, 75, 70, 65, 72, 68, 60],
+      backgroundColor: 'rgba(27,79,216,0.10)',
+      borderColor: '#1B4FD8',
+      borderWidth: 2,
+      pointBackgroundColor: '#1B4FD8',
+      pointRadius: 3,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      r: {
+        min: 40, max: 100,
+        ticks: { display: false },
+        grid: { color: gridColor },
+        angleLines: { color: gridColor },
+        pointLabels: { color: textColor, font: { size: 10, family: 'Manrope' } }
+      }
+    }
+  }
+});
+
+new Chart(document.getElementById('donutChart'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Мікронавчання 28%', 'Воркшопи 22%', 'Гібридне 18%', 'Симуляції 15%', 'Сертифікати 10%', 'Self-paced 7%'],
+    datasets: [{
+      data: [28, 22, 18, 15, 10, 7],
+      backgroundColor: ['#1B4FD8','#6B3FA0','#0E8A6E','#C47A1A','#D44C3D','#888'],
+      borderWidth: 0,
+      hoverOffset: 4
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    cutout: '65%',
+    plugins: {
+      legend: {
+        display: true, position: 'bottom',
+        labels: { color: textColor, font: { size: 10, family: 'Manrope' }, padding: 8, boxWidth: 8, boxHeight: 8 }
+      }
+    }
+  }
+});
+</script>
+</body>
+</html>
